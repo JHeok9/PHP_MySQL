@@ -1,21 +1,5 @@
 <?php
 $conn = mysqli_connect("localhost", "testuser", "12345", "test");
-$sql = "select * from author";
-$result = mysqli_query($conn, $sql);
-
-$author_list = '';
-while($row = mysqli_fetch_array($result)){
-    $filterde = array(
-        'id' => htmlspecialchars($row['id']),
-        'name' => htmlspecialchars($row['name']),
-        'profile' => htmlspecialchars($row['profile'])
-    );
-    $author_list .= '<tr>';
-    $author_list .= '<td>'.$filterde['id'].'</td>';
-    $author_list .= '<td>'.$filterde['name'].'</td>';
-    $author_list .= '<td>'.$filterde['profile'].'</td>';
-    $author_list .= '</tr>';
-}
 
 ?>
 <!DOCTYPE html>
@@ -32,13 +16,61 @@ while($row = mysqli_fetch_array($result)){
                 <td>id</td>
                 <td>name</td>
                 <td>profile</td>
+                <td></td>
+                <td></td>
             </tr>
-            <?=$author_list?>
+            <?php
+            $sql = "SELECT * FROM author";
+            $result = mysqli_query($conn, $sql);
+            while($row = mysqli_fetch_array($result)){
+            $filtered = array(
+                'id'=>htmlspecialchars($row['id']),
+                'name'=>htmlspecialchars($row['name']),
+                'profile'=>htmlspecialchars($row['profile'])
+            );
+            ?>
+            <tr>
+                <td><?=$filtered['id']?></td>
+                <td><?=$filtered['name']?></td>
+                <td><?=$filtered['profile']?></td>
+                <td><a href="author.php?id=<?=$filtered['id']?>">update</a></td>
+                <td>
+                <form action="process_delete_author.php" method="post" onsubmit="if(!confirm('sure?')){return false;}">
+                    <input type="hidden" name="id" value="<?=$filtered['id']?>">
+                    <input type="submit" value="delete">
+                </form>
+                </td>
+            </tr>
+            <?php } ?>
         </table>
-        <form action="process_create_author.php" method="post">
-            <p><input type="text" name="name" placeholder="name"></p>
-            <p><textarea name="profile" placeholder="profile"></textarea></p>
-            <p><input type="submit" value="Create author"></p>
+
+        <?php
+        $escaped = array(
+            'name' => '',
+            'profile' => ''
+        );
+        $label_submit = "Create author";
+        $form_action = "process_create_author.php";
+        $form_id = '';
+        if(isset($_GET['id'])){
+            $filtered_id = htmlspecialchars($_GET['id']);
+            settype($filtered_id, "integer");
+            $sql = "select * from author where id = $filtered_id";
+            $result = mysqli_query($conn, $sql);
+            $row = mysqli_fetch_array($result);
+            $escaped['name'] = htmlspecialchars($row['name']);
+            $escaped['profile'] = htmlspecialchars($row['profile']);
+            $label_submit = "Update author";
+            $form_action = "process_update_author.php";
+            $form_id = "<input type='hidden' name='id' value='".$_GET['id']."'";
+        }
+        ?>
+
+        <form action="<?=$form_action?>" method="post">
+            <p><?=$form_id?></p>
+            <p><input type="text" name="name" placeholder="name" value="<?=$escaped['name']?>"></p>
+            <p><textarea name="profile" placeholder="profile"><?=$escaped['profile']?></textarea></p>
+            <p><input type="submit" value="<?=$label_submit?>"></p>
         </form>
     </body>
 </html>
