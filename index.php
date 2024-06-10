@@ -45,10 +45,11 @@ if(isset($_GET['id'])){
     </head>
     <body>
         <h1><a href="index.php">WEB</a></h1>
+        <p><a href="author.php">author</a></p>
         <ol>
             <?=$list?>
         </ol>
-        <a href="create.php">create</a>
+        <p><a href="create.php">create</a></p>
         <?=$update_link?>
         <?=$delete_link?>
         <h2><?=$article['title']?></h2>
